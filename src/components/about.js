@@ -1,10 +1,26 @@
 import React, { Component } from 'react';
-import { FormControl, FormGroup, ControlLabel, Button, Label } from 'react-bootstrap';
+import { connect } from 'react-redux';
+import { bindActionCreators } from 'redux';
+import * as action from '../Actions/submitAction';
+import { FormControl, FormGroup, ControlLabel, Button } from 'react-bootstrap';
 
-export default class About extends Component {
+export class About extends Component {
     constructor() {
         super();
-        this.state = { empid: '', name: '', phone: '', designation: '' };
+        this.state = { data:{id: '', name: '', phone: '', email: '' } };
+        this.onEventChange = this.onEventChange.bind(this);
+
+    }
+    handleSubmit(event){
+        this.props.actions.submitAction(this.state.data);
+        alert("Saved" + this.state.data.id);
+        event.preventDefault();
+    }
+    onEventChange(event){
+        const field = event.target.name;
+        let data = this.state.data;
+        data[field] = event.target.value;
+        return this.setState({data : data});
     }
     render() {
         return (
@@ -13,17 +29,19 @@ export default class About extends Component {
                 <h3>
                     Add User
                     </h3>
+                    
                 <br />
-                <form onSubmit={(event) => this.handleSubmit(event)}>
+                <form id = 'userForm' onSubmit={(event) => this.handleSubmit(event)}>
                     <FormGroup
-                        controlId="empid"
+                        controlId="id"
                     >
                         <ControlLabel>User ID</ControlLabel>
                         <FormControl
                             type="number"
-                            value={this.state.empid}
+                            value={this.state.data.id}
+                            name = "id"
                             placeholder="Enter ID"
-                            onChange={(event) => this.setState({ empid: event.target.value })}
+                            onChange={this.onEventChange}
                         />
                         <FormControl.Feedback />
                         <br />
@@ -32,7 +50,8 @@ export default class About extends Component {
                             type="text"
                             value={this.state.name}
                             placeholder="Enter Name"
-                            onChange={(event) => this.setState({ name: event.target.value })}
+                            name = "name"
+                            onChange={this.onEventChange}
                         />
                         <FormControl.Feedback />
                         <br />
@@ -41,16 +60,18 @@ export default class About extends Component {
                             type="number"
                             value={this.state.phone}
                             placeholder="Enter Contact Number"
-                            onChange={(event) => this.setState({ phone: event.target.value })}
+                            name = "phone"
+                            onChange={this.onEventChange}
                         />
                         <FormControl.Feedback />
                         <br />
                         <ControlLabel>Email</ControlLabel>
                         <FormControl
                             type="email"
-                            value={this.state.designation}
+                            value={this.state.email}
                             placeholder="Enter Email"
-                            onChange={(event) => this.setState({ designation: event.target.value })}
+                            name = "email"
+                            onChange={this.onEventChange}
                         />
                         <FormControl.Feedback />
                         <br />
@@ -58,10 +79,33 @@ export default class About extends Component {
                         <Button type="submit" > Submit </Button>
                     </FormGroup>
                 </form>
+            <br />
+            {this.props.submitReducer.map((data) => {
+                    return (<div>
+                        <p>Submitted User details are</p>
+                        {data.id}
+                        <br />
+                        {data.email}
+                    </div>);
+                })}
             </div>
         );
     }
 
 }
 
+function mapStateToProps(state) {
+    return {
+        submitReducer: state.submitReducer
+    }
+}
 
+function mapDispatchToProps(dispatch) {
+    return {
+
+        actions: bindActionCreators(action, dispatch)
+
+    };
+}
+
+export default connect(mapStateToProps, mapDispatchToProps) (About);
